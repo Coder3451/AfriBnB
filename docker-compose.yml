@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: afribnb_user
+      POSTGRES_PASSWORD: afribnb_password
+      POSTGRES_DB: afribnb_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U afribnb_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    command: python app.py
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: development
+      DEBUG: "True"
+      DATABASE_URL: postgresql://afribnb_user:afribnb_password@db:5432/afribnb_dev
+      JWT_SECRET_KEY: dev-secret-key
+      SECRET_KEY: dev-key
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
