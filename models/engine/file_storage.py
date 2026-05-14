@@ -9,8 +9,14 @@ class FileStorage:
     __file_path = "file.json"
     __objects = {}
 
-    def all(self):
+    def all(self, cls=None):
         """Return all objects"""
+        if cls:
+            filtered_dict = {}
+            for key, obj in self.__objects.items():
+                if key.split(".")[0] == cls.__name__:
+                    filtered_dict[key] = obj
+            return filtered_dict
         return self.__objects
     
     def new(self, obj):
@@ -25,6 +31,13 @@ class FileStorage:
             obj_dict[key] = obj.to_dict()
         with open(self.__file_path, "w", encoding="utf-8") as f:
             json.dump(obj_dict, f)
+    
+    def delete(self, obj=None):
+        """Delete obj from __objects if it exists"""
+        if obj:
+            key = "{}.{}".format(obj.__class__.__name__, obj.id)
+            if key in self.__objects:
+                del self.__objects[key]
     
     def reload(self):
         """Deserialize JSON file to objects"""

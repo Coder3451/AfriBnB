@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AfriBnB - Mini Airbnb</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        header h1 {
+            color: #667eea;
+            font-size: 28px;
+        }
+        
+        nav {
+            display: flex;
+            gap: 15px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        button.primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        button.primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        button.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        button.secondary:hover {
+            background: #d0d0d0;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        input, textarea, select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: #000;
+        }
+        
+        .listings {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .listing-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .listing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .listing-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .listing-header h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .listing-body {
+            padding: 15px;
+        }
+        
+        .listing-price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        
+        .listing-info {
+            font-size: 13px;
+            color: #666;
+            margin: 8px 0;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .listing-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .listing-buttons button {
+            flex: 1;
+            padding: 8px;
+            font-size: 13px;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .user-info {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-info p {
+            margin: 5px 0;
+            color: #333;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .no-listings {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            color: #666;
+        }
+        
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏠 AfriBnB</h1>
+            <nav>
+                <div id="auth-buttons">
+                    <button class="primary" onclick="openLoginModal()">Login</button>
+                    <button class="secondary" onclick="openRegisterModal()">Register</button>
+                </div>
+                <div id="user-buttons" class="hidden">
+                    <button class="secondary" onclick="openAddPlaceModal()">+ Add Listing</button>
+                    <button class="secondary" onclick="logout()">Logout</button>
+                </div>
+            </nav>
+        </header>
+        
+        <div id="alert" class="alert"></div>
+        
+        <div id="user-info" class="user-info hidden">
+            <p><strong>Welcome, <span id="username"></span>!</strong></p>
+            <p>Email: <span id="useremail"></span></p>
+        </div>
+        
+        <div id="listings" class="listings"></div>
+        <div id="no-listings" class="no-listings hidden">No listings found</div>
+    </div>
+    
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLoginModal()">&times;</span>
+            <h2>Login</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="primary">Login</button>
+                    <button type="button" class="secondary" onclick="closeLoginModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRegisterModal()">&times;</span>
+            <h2>Register</h2>
+            <form onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="registerFirstName">
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" id="registerLastName">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="registerPassword" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="primary">Register</button>
+                    <button type="button" class="secondary" onclick="closeRegisterModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Add Place Modal -->
+    <div id="addPlaceModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddPlaceModal()">&times;</span>
+            <h2>Add New Listing</h2>
+            <form onsubmit="handleAddPlace(event)">
+                <div class="form-group">
+                    <label>Listing Name *</label>
+                    <input type="text" id="placeName" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="placeDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>City</label>
+                    <input type="text" id="placeCity">
+                </div>
+                <div class="form-group">
+                    <label>Country</label>
+                    <input type="text" id="placeCountry">
+                </div>
+                <div class="form-group">
+                    <label>Price per Night ($) *</label>
+                    <input type="number" id="placePrice" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Rooms</label>
+                    <input type="number" id="placeRooms" min="1" value="1">
+                </div>
+                <div class="form-group">
+                    <label>Bathrooms</label>
+                    <input type="number" id="placeBathrooms" min="1" value="1">
+                </div>
+                <div class="form-group">
+                    <label>Max Guests</label>
+                    <input type="number" id="placeMaxGuests" min="1" value="1">
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="primary">Create Listing</button>
+                    <button type="button" class="secondary" onclick="closeAddPlaceModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let token = localStorage.getItem('token');
+        let currentUser = null;
+
+        // Check if user is logged in on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            if (token) {
+                loadUserProfile();
+            } else {
+                showAuthButtons();
+            }
+            loadListings();
+        });
+
+        function showAlert(message, type = 'success') {
+            const alertEl = document.getElementById('alert');
+            alertEl.textContent = message;
+            alertEl.className = `alert ${type}`;
+            setTimeout(() => {
+                alertEl.className = 'alert';
+            }, 5000);
+        }
+
+        function showAuthButtons() {
+            document.getElementById('auth-buttons').classList.remove('hidden');
+            document.getElementById('user-buttons').classList.add('hidden');
+            document.getElementById('user-info').classList.add('hidden');
+        }
+
+        function showUserButtons() {
+            document.getElementById('auth-buttons').classList.add('hidden');
+            document.getElementById('user-buttons').classList.remove('hidden');
+            document.getElementById('user-info').classList.remove('hidden');
+        }
+
+        function openLoginModal() {
+            document.getElementById('loginModal').style.display = 'block';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        function openRegisterModal() {
+            document.getElementById('registerModal').style.display = 'block';
+        }
+
+        function closeRegisterModal() {
+            document.getElementById('registerModal').style.display = 'none';
+            document.getElementById('registerEmail').value = '';
+            document.getElementById('registerPassword').value = '';
+            document.getElementById('registerFirstName').value = '';
+            document.getElementById('registerLastName').value = '';
+        }
+
+        function openAddPlaceModal() {
+            document.getElementById('addPlaceModal').style.display = 'block';
+        }
+
+        function closeAddPlaceModal() {
+            document.getElementById('addPlaceModal').style.display = 'none';
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            fetch(`${API_BASE}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.access_token) {
+                    token = data.access_token;
+                    localStorage.setItem('token', token);
+                    currentUser = data.user;
+                    closeLoginModal();
+                    showUserButtons();
+                    document.getElementById('username').textContent = data.user.first_name || data.user.email;
+                    document.getElementById('useremail').textContent = data.user.email;
+                    showAlert('Login successful!');
+                } else {
+                    showAlert(data.error || 'Login failed', 'error');
+                }
+            })
+            .catch(e => showAlert('Error: ' + e, 'error'));
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const first_name = document.getElementById('registerFirstName').value;
+            const last_name = document.getElementById('registerLastName').value;
+
+            fetch(`${API_BASE}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, first_name, last_name })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.access_token) {
+                    token = data.access_token;
+                    localStorage.setItem('token', token);
+                    currentUser = data.user;
+                    closeRegisterModal();
+                    showUserButtons();
+                    document.getElementById('username').textContent = data.user.first_name || data.user.email;
+                    document.getElementById('useremail').textContent = data.user.email;
+                    loadListings();
+                    showAlert('Registration successful!');
+                } else {
+                    showAlert(data.error || 'Registration failed', 'error');
+                }
+            })
+            .catch(e => showAlert('Error: ' + e, 'error'));
+        }
+
+        function loadUserProfile() {
+            fetch(`${API_BASE}/auth/profile`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.id) {
+                    currentUser = data;
+                    showUserButtons();
+                    document.getElementById('username').textContent = data.first_name || data.email;
+                    document.getElementById('useremail').textContent = data.email;
+                } else {
+                    token = null;
+                    localStorage.removeItem('token');
+                    showAuthButtons();
+                }
+            });
+        }
+
+        function logout() {
+            token = null;
+            currentUser = null;
+            localStorage.removeItem('token');
+            showAuthButtons();
+            loadListings();
+            showAlert('Logged out successfully!');
+        }
+
+        function loadListings() {
+            fetch(`${API_BASE}/places`)
+            .then(r => r.json())
+            .then(data => {
+                const container = document.getElementById('listings');
+                const noListings = document.getElementById('no-listings');
+                
+                if (data.places && data.places.length > 0) {
+                    container.innerHTML = data.places.map(place => `
+                        <div class="listing-card">
+                            <div class="listing-header">
+                                <h3>${place.name}</h3>
+                                <p>${place.city || 'Location TBA'}, ${place.country || 'Unknown'}</p>
+                            </div>
+                            <div class="listing-body">
+                                <div class="listing-price">$${place.price_per_night}/night</div>
+                                <p style="color: #666; font-size: 13px; margin-bottom: 10px;">${place.description || 'No description'}</p>
+                                <div class="listing-info">
+                                    <span>🛏️ ${place.rooms} rooms</span>
+                                    <span>🚿 ${place.bathrooms} baths</span>
+                                    <span>👥 ${place.max_guests} guests</span>
+                                </div>
+                                <div class="listing-buttons">
+                                    <button class="primary" onclick="viewDetails('${place.id}')">View</button>
+                                    ${token && currentUser && currentUser.id === place.owner_id ? 
+                                        `<button class="secondary" onclick="editPlace('${place.id}')">Edit</button>
+                                         <button class="secondary" onclick="deletePlace('${place.id}')">Delete</button>` 
+                                        : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                    noListings.classList.add('hidden');
+                } else {
+                    container.innerHTML = '';
+                    noListings.classList.remove('hidden');
+                }
+            })
+            .catch(e => showAlert('Error loading listings: ' + e, 'error'));
+        }
+
+        function handleAddPlace(event) {
+            event.preventDefault();
+            if (!token) {
+                showAlert('You must be logged in to add a listing', 'error');
+                return;
+            }
+
+            const placeData = {
+                name: document.getElementById('placeName').value,
+                description: document.getElementById('placeDescription').value,
+                city: document.getElementById('placeCity').value,
+                country: document.getElementById('placeCountry').value,
+                price_per_night: parseFloat(document.getElementById('placePrice').value),
+                rooms: parseInt(document.getElementById('placeRooms').value),
+                bathrooms: parseInt(document.getElementById('placeBathrooms').value),
+                max_guests: parseInt(document.getElementById('placeMaxGuests').value)
+            };
+
+            fetch(`${API_BASE}/places`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(placeData)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.place) {
+                    closeAddPlaceModal();
+                    loadListings();
+                    showAlert('Listing created successfully!');
+                    document.querySelector('#addPlaceModal form').reset();
+                } else {
+                    showAlert(data.error || 'Failed to create listing', 'error');
+                }
+            })
+            .catch(e => showAlert('Error: ' + e, 'error'));
+        }
+
+        function deletePlace(placeId) {
+            if (!confirm('Are you sure you want to delete this listing?')) return;
+
+            fetch(`${API_BASE}/places/${placeId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.message) {
+                    loadListings();
+                    showAlert('Listing deleted successfully!');
+                } else {
+                    showAlert(data.error || 'Failed to delete listing', 'error');
+                }
+            })
+            .catch(e => showAlert('Error: ' + e, 'error'));
+        }
+
+        function editPlace(placeId) {
+            alert('Edit feature coming soon!');
+        }
+
+        function viewDetails(placeId) {
+            alert('View details coming soon!');
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
